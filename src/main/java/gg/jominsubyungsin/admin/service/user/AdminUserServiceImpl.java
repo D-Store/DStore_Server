@@ -3,6 +3,7 @@ import gg.jominsubyungsin.admin.domain.dto.user.dataIgnore.ASelectUserDto;
 import gg.jominsubyungsin.admin.domain.dto.user.response.UserListResponse;
 import gg.jominsubyungsin.admin.domain.repository.UserDetailRepository;
 import gg.jominsubyungsin.admin.enums.SearchMode;
+import gg.jominsubyungsin.domain.dto.user.request.UserDto;
 import gg.jominsubyungsin.domain.entity.UserEntity;
 import gg.jominsubyungsin.admin.domain.repository.UserListRepository;
 import gg.jominsubyungsin.domain.response.Response;
@@ -18,6 +19,7 @@ import org.springframework.web.client.HttpServerErrorException;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service
@@ -102,7 +104,9 @@ public class AdminUserServiceImpl implements AdminUserService {
     @Transactional
     public void dropUser(Long id){
         try {
-        userRepository.deleteById(id);
+            UserEntity user1 = isThereUser(id);
+            user1.setOnDelete(true);
+            userRepository.save(user1);
         } catch (Exception e) {
             e.printStackTrace();
             throw new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR, "서버 에러");

@@ -24,6 +24,9 @@ import java.util.List;
 public class AdminUserController {
     private final AdminUserService adminUserService;
 
+    /**
+     * 일반 유저 받아오기
+     */
     @GetMapping("/general")
     public Response getUser(Pageable pageable) {
         Response result;
@@ -33,6 +36,9 @@ public class AdminUserController {
         return result;
     }
 
+    /**
+     * 어드민 유저 받아오기
+     */
     @GetMapping("/adminUser")
     public Response getAdmin(Pageable pageable) {
         Response result;
@@ -42,6 +48,9 @@ public class AdminUserController {
         return result;
     }
 
+    /**
+     * 유저 삭제
+     */
     @DeleteMapping("/{id}")
     public Response dropUser(@PathVariable Long id) {
         Response result = new Response();
@@ -59,6 +68,9 @@ public class AdminUserController {
         return result;
     }
 
+    /**
+     * 유저 권한 추가
+     */
     @PutMapping("/permission/{id}")
     public Response addPer(@PathVariable Long id) {
         Response result = new Response();
@@ -76,6 +88,9 @@ public class AdminUserController {
         return result;
     }
 
+    /**
+     * 유저 권한 삭제
+     */
     @DeleteMapping("/permission/{id}")
     public Response dropPer(@PathVariable Long id) {
         Response result = new Response();
@@ -93,6 +108,9 @@ public class AdminUserController {
         return result;
     }
 
+    /**
+     * 유저 검색
+     */
     @GetMapping("/search")
     public Response searchUser(Pageable pageable, HttpServletRequest request) {
         Response result;
@@ -112,6 +130,9 @@ public class AdminUserController {
         return result;
     }
 
+    /**
+     * 역할로 유저 찾기
+     */
     private Response findUserByRole(Pageable pageable, Role role) {
 
         Response result;
@@ -125,6 +146,9 @@ public class AdminUserController {
         return result;
     }
 
+    /**
+     * 유저 검색
+     */
     private Response searchUserByMode(Pageable pageable, Role role,
                                       SearchMode mode, String keyword) {
 

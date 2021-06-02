@@ -13,6 +13,7 @@ public class ASelectUserDto {
     private String email;
     private String profileImage;
     private Role role;
+    private Boolean onDelete;
 
     public ASelectUserDto(UserEntity userEntity) {
         this.id = userEntity.getId();
@@ -20,5 +21,6 @@ public class ASelectUserDto {
         this.email = userEntity.getEmail();
         this.profileImage = userEntity.getProfileImage();
         this.role = userEntity.getRole();
+        this.onDelete = userEntity.getOnDelete();
     }
 }

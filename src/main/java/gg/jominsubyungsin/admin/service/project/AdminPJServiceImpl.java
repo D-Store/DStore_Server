@@ -16,6 +16,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 
@@ -81,30 +82,27 @@ public class AdminPJServiceImpl implements AdminPJService {
         }
 
     }
-//
-//    @Override
-//    public List<ProjectEntity> getProjectById(Long id){
-//        List<ProjectEntity> pjList;
-//
-//        try {
-//            pjList = projectRepository.findByUsers(id);
-//            return pjList;
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            throw e;
-//        }
-//    }
 
     @Override
-    public List<ProjectEntity> dropProject(Long id) {
-        List<ProjectEntity> pjList;
+    @Transactional
+    public void dropProject(Long id) {
 
         try {
             projectRepository.deleteById(id);
-            pjList = projectRepository.findAll();
-            return pjList;
         } catch (Exception e) {
+            e.printStackTrace();
             throw e;
         }
+    }
+
+    /**
+     * 프로젝트 엔티티 가져오기
+     */
+    @Override
+    public ProjectEntity isThereProject(Long id) {
+        return projectRepository.findById(id)
+                .orElseThrow(
+                        () -> new HttpClientErrorException(HttpStatus.BAD_REQUEST, "없는 프로젝트 입니다")
+                );
     }
 }
