@@ -1,8 +1,8 @@
 package gg.jominsubyungsin.admin.service.user;
-import gg.jominsubyungsin.admin.domain.dto.user.dataIgnore.SelectUserForAdminDto;
+import gg.jominsubyungsin.admin.domain.dto.user.dataIgnore.ASelectUserDto;
 import gg.jominsubyungsin.admin.domain.dto.user.response.UserListResponse;
 import gg.jominsubyungsin.admin.domain.repository.UserDetailRepository;
-import gg.jominsubyungsin.domain.dto.user.request.UserDto;
+import gg.jominsubyungsin.admin.enums.SearchMode;
 import gg.jominsubyungsin.domain.entity.UserEntity;
 import gg.jominsubyungsin.admin.domain.repository.UserListRepository;
 import gg.jominsubyungsin.domain.response.Response;
@@ -12,9 +12,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
 
-import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,8 +26,8 @@ public class AdminUserServiceImpl implements AdminUserService {
     private final UserDetailRepository userRepository;
 
     @Override
-    public List<SelectUserForAdminDto> getAdminUserList(){
-        List<SelectUserForAdminDto> adminUserList = new ArrayList<>();
+    public List<ASelectUserDto> getAdminUserList(){
+        List<ASelectUserDto> adminUserList = new ArrayList<>();
 
         List<UserEntity> userEntities;
 
@@ -35,7 +36,7 @@ public class AdminUserServiceImpl implements AdminUserService {
 
             for (UserEntity userEntity : userEntities) {
                 System.out.println("admin user's id : " + userEntity.getId());
-                SelectUserForAdminDto userDto = new SelectUserForAdminDto(userEntity);
+                ASelectUserDto userDto = new ASelectUserDto(userEntity);
                 adminUserList.add(userDto);
             }
         } catch (Exception e) {
@@ -47,8 +48,8 @@ public class AdminUserServiceImpl implements AdminUserService {
     }
 
     @Override
-    public List<SelectUserForAdminDto> getGeneralUserList(){
-        List<SelectUserForAdminDto> generalUserList = new ArrayList<>();
+    public List<ASelectUserDto> getGeneralUserList(){
+        List<ASelectUserDto> generalUserList = new ArrayList<>();
 
         List<UserEntity> userEntities;
 
@@ -57,7 +58,7 @@ public class AdminUserServiceImpl implements AdminUserService {
 
             for (UserEntity userEntity:userEntities) {
                 System.out.println("general user's id : " + userEntity.getId());
-                SelectUserForAdminDto userDto = new SelectUserForAdminDto(userEntity);
+                ASelectUserDto userDto = new ASelectUserDto(userEntity);
                 generalUserList.add(userDto);
             }
         } catch (Exception e) {
@@ -72,13 +73,12 @@ public class AdminUserServiceImpl implements AdminUserService {
     public Response getUserList(Pageable pageable, Role role) {
         UserListResponse response = new UserListResponse();
         Page<UserEntity> users;
-        List<SelectUserForAdminDto> generalUserList = new ArrayList<>();
-        Page<SelectUserForAdminDto> result;
+        List<ASelectUserDto> generalUserList = new ArrayList<>();
 
         try {
             users = userListRepository.findByRole(pageable, role);
             for (UserEntity u : users) {
-                SelectUserForAdminDto userDto = new SelectUserForAdminDto(u);
+                ASelectUserDto userDto = new ASelectUserDto(u);
                 generalUserList.add(userDto);
             }
         } catch (Exception e) {
@@ -99,24 +99,23 @@ public class AdminUserServiceImpl implements AdminUserService {
      * @param id
      */
     @Override
+    @Transactional
     public void dropUser(Long id){
-        try{
-            userRepository.deleteById(id);
-        } catch (IllegalArgumentException e){
+        try {
+        userRepository.deleteById(id);
+        } catch (Exception e) {
             e.printStackTrace();
-            throw new HttpClientErrorException(HttpStatus.BAD_REQUEST, "없는 유저입니다.");
+            throw new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR, "서버 에러");
         }
     }
 
     /**
      * 유저 admin 권한 추가
-     * @param user
+     *
      */
     @Override
     @Transactional
-    public void addPerUser(UserDto user){
-        UserEntity target = isThereUser(user.getId());
-
+    public void addPerUser(UserEntity target){
         target.setRole(Role.ADMIN);
         try {
             userRepository.save(target);
@@ -128,13 +127,10 @@ public class AdminUserServiceImpl implements AdminUserService {
 
     /**
      * 유저 admin 권한 삭제
-     * @param user
      */
     @Override
     @Transactional
-    public void delPerUser(UserDto user){
-        UserEntity target = isThereUser(user.getId());
-
+    public void delPerUser(UserEntity target){
         target.setRole(Role.USER);
         try {
             userRepository.save(target);
@@ -144,12 +140,43 @@ public class AdminUserServiceImpl implements AdminUserService {
         }
     }
 
+    @Override
+    public Response searchUser(Pageable pageable, Role role, SearchMode mode, String keyword) {
+        UserListResponse response = new UserListResponse();
+        Page<UserEntity> users = null;
+        List<ASelectUserDto> userList = new ArrayList<>();
+
+        try {
+            if (mode == SearchMode.name) {
+                users = userListRepository.findByRoleAndNameContaining(pageable, role, keyword);
+            } else if (mode == SearchMode.email) {
+                users = userListRepository.findByRoleAndEmailContaining(pageable, role, keyword);
+            }
+
+            for (UserEntity u : users) {
+                ASelectUserDto userDto = new ASelectUserDto(u);
+                userList.add(userDto);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
+
+        response.setHttpStatus(HttpStatus.OK);
+        response.setMessage("성공");
+        response.setUsers(userList);
+        response.setTotalPages(users.getTotalPages());
+
+        return response;
+    }
+
     /**
      * 유저 존재 확인
      * @param id
      * @return target(entity)
      */
-    private UserEntity isThereUser(Long id){
+    @Override
+    public UserEntity isThereUser(Long id){
         return userRepository.findById(id)
                 .orElseThrow(
                         () -> new HttpClientErrorException(HttpStatus.BAD_REQUEST, "없는 회원입니다")
