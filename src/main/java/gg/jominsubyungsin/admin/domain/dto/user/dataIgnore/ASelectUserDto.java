@@ -7,14 +7,14 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class SelectUserForAdminDto {
+public class ASelectUserDto {
     private Long id;
     private String name;
     private String email;
     private String profileImage;
     private Role role;
 
-    public SelectUserForAdminDto(UserEntity userEntity) {
+    public ASelectUserDto(UserEntity userEntity) {
         this.id = userEntity.getId();
         this.name = userEntity.getName();
         this.email = userEntity.getEmail();
