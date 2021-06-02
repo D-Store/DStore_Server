@@ -20,30 +20,11 @@ import java.util.List;
 public class AdminPJController {
     private final AdminPJService adminPJService;
 
-//    @GetMapping("/list/all")
-//    public Response showProjectList(){
-//        ProjectListResponse response = new ProjectListResponse();
-//
-//        List<ProjectEntity> allPjList;
-//
-//        System.out.println("프로젝트 전체 보기");
-//
-//        try {
-//            allPjList = adminPJService.getProjectAll();
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            throw e;
-//        }
-//
-//        response.setHttpStatus(HttpStatus.OK);
-//        response.setMessage("프로젝트 전체보기 성공");
-//        response.setProjectList(allPjList);
-//
-//        return response;
-//    }
-
+    /**
+     * 프로젝트 리스트 받아오기
+     */
     @GetMapping("")
-    public Response ProjectList(Pageable pageable) {
+    public Response projectList(Pageable pageable) {
         Response result;
 
         result = getProjectList(pageable);
@@ -51,48 +32,29 @@ public class AdminPJController {
         return result;
     }
 
-//    @GetMapping("/list")
-//    public Response showProjectListAsUserId(@RequestParam Long id){
-//        ProjectListResponse response = new ProjectListResponse();
-//
-//        List<ProjectEntity> PjList;
-//
-//        System.out.println(id + "의 프로젝트 보기");
-//
-//        try {
-//            PjList = adminPJService.getProjectById(id);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            throw e;
-//        }
-//
-//        response.setHttpStatus(HttpStatus.OK);
-//        response.setMessage(id + "의 프로젝트 보기");
-//        response.setProjectList(PjList);
-//
-//        return response;
-//    }
+    /**
+     * 프로젝트 삭제
+     */
+    @DeleteMapping("/{id}")
+    public Response dropProject(@PathVariable Long id){
+        Response result = new Response();
 
-//    @DeleteMapping("/delete")
-//    public Response deleteProject(@RequestParam Long projectId){
-//        ProjectListResponse response = new ProjectListResponse();
-//
-//        List<ProjectEntity> PjList;
-//
-//        try {
-//            PjList = adminPJService.dropProject(projectId);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            throw e;
-//        }
-//
-//        response.setHttpStatus(HttpStatus.OK);
-//        response.setMessage("프로젝트 삭제 완료");
-//        response.setProjectList(PjList);
-//
-//        return response;
-//    }
+        adminPJService.isThereProject(id);
+        try {
+            adminPJService.dropProject(id);
+        } catch (Exception e) {
+            throw new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR, "서버 에러");
+        }
 
+        result.setHttpStatus(HttpStatus.OK);
+        result.setMessage("성공");
+
+        return result;
+    }
+
+    /**
+     * 프로젝트 받아오기
+     */
     private Response getProjectList(Pageable pageable) {
         Response result;
 

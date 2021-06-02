@@ -11,9 +11,9 @@ import java.util.List;
 public interface AdminPJService {
     List<ProjectEntity> getProjectAll();
 
-//    List<ProjectEntity> getProjectById(Long id);
-
     Response getProjects(Pageable pageable);
 
-    List<ProjectEntity> dropProject(Long id);
+    void dropProject(Long id);
+
+    ProjectEntity isThereProject(Long id);
 }
