@@ -1,14 +1,16 @@
 package gg.jominsubyungsin.admin.service.project;
 
+import gg.jominsubyungsin.admin.domain.dto.comment.dataIgnore.ASelectCommentDto;
+import gg.jominsubyungsin.admin.domain.dto.project.dataIgnore.ASelectDetailPJDto;
 import gg.jominsubyungsin.admin.domain.dto.project.dataIgnore.ASelectPJDto;
+import gg.jominsubyungsin.admin.domain.dto.project.response.ProjectDetailResponse;
 import gg.jominsubyungsin.admin.domain.dto.project.response.ProjectListResponse;
 import gg.jominsubyungsin.admin.domain.dto.user.dataIgnore.ASelectUserDto;
+import gg.jominsubyungsin.admin.domain.dto.user.dataIgnore.ASimpleUserDto;
+import gg.jominsubyungsin.admin.domain.repository.LikeRepo;
 import gg.jominsubyungsin.admin.domain.repository.ProjectListRepo;
-import gg.jominsubyungsin.domain.dto.project.dataIgnore.SelectProjectDto;
-import gg.jominsubyungsin.domain.entity.ProjectEntity;
-import gg.jominsubyungsin.domain.entity.ProjectTagConnectEntity;
-import gg.jominsubyungsin.domain.entity.ProjectUserConnectEntity;
-import gg.jominsubyungsin.domain.entity.UserEntity;
+import gg.jominsubyungsin.admin.service.like.AdminLikeService;
+import gg.jominsubyungsin.domain.entity.*;
 import gg.jominsubyungsin.domain.repository.ProjectRepository;
 import gg.jominsubyungsin.domain.response.Response;
 import lombok.RequiredArgsConstructor;
@@ -26,8 +28,11 @@ import java.util.List;
 @RequiredArgsConstructor
 @Service
 public class AdminPJServiceImpl implements AdminPJService {
+    private final AdminLikeService likeService;
+
     private final ProjectRepository projectRepository;
     private final ProjectListRepo projectListRepo;
+    private final LikeRepo likeRepo;
 
     @Override
     public List<ProjectEntity> getProjectAll(){
@@ -64,7 +69,10 @@ public class AdminPJServiceImpl implements AdminPJService {
                     tags.add(connectEntity.getTag().getTag());
                 }
 
-                ASelectPJDto aSelectPJDto = new ASelectPJDto(projectEntity, userDtos, tags);
+                Long likeNum;
+                likeNum = likeService.getLikeNum(projectEntity.getId());
+
+                ASelectPJDto aSelectPJDto = new ASelectPJDto(projectEntity, userDtos, tags, likeNum);
                 pjDtos.add(aSelectPJDto);
             }
 
@@ -89,6 +97,51 @@ public class AdminPJServiceImpl implements AdminPJService {
 
         try {
             projectRepository.deleteById(id);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
+
+    @Override
+    public Response getProjectDetail(ProjectEntity projectEntity) {
+        ASelectDetailPJDto pjDto;
+        ProjectDetailResponse response = new ProjectDetailResponse();
+
+        try {
+            Long likeNum = likeService.getLikeNum(projectEntity.getId());
+            List<ASelectCommentDto> commentDtos = new ArrayList<>();
+            List<ASelectUserDto> userDtos = new ArrayList<>();
+            List<String> tags = new ArrayList<>();
+            List<FileEntity> fileEntities = new ArrayList<>(projectEntity.getFiles());
+
+            List<CommentEntity> comments = projectEntity.getComments();
+            for (CommentEntity comment : comments) {
+                ASimpleUserDto simpleUserDto = new ASimpleUserDto(comment.getUser());
+                ASelectCommentDto commentDto = new ASelectCommentDto(comment, simpleUserDto);
+
+                commentDtos.add(commentDto);
+            }
+
+            List<ProjectUserConnectEntity> users = projectEntity.getUsers();
+            for (ProjectUserConnectEntity user : users) {
+                ASelectUserDto userDto = new ASelectUserDto(user.getUser());
+
+                userDtos.add(userDto);
+            }
+
+            for (ProjectTagConnectEntity tag : projectEntity.getTags()) {
+                tags.add(tag.getTag().getTag());
+            }
+
+            pjDto = new ASelectDetailPJDto(projectEntity, userDtos, tags, fileEntities, likeNum, commentDtos);
+
+            response.setProject(pjDto);
+            response.setHttpStatus(HttpStatus.OK);
+            response.setMessage("프로젝트 보기 성공");
+
+            return response;
+
         } catch (Exception e) {
             e.printStackTrace();
             throw e;

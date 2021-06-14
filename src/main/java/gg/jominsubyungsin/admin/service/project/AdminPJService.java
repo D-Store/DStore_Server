@@ -15,5 +15,7 @@ public interface AdminPJService {
 
     void dropProject(Long id);
 
+    Response getProjectDetail(ProjectEntity projectEntity);
+
     ProjectEntity isThereProject(Long id);
 }

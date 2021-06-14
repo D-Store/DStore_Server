@@ -1,5 +1,6 @@
 package gg.jominsubyungsin.admin.controller;
 
+import gg.jominsubyungsin.admin.domain.dto.project.response.ProjectDetailResponse;
 import gg.jominsubyungsin.admin.domain.dto.project.response.ProjectListResponse;
 import gg.jominsubyungsin.admin.service.project.AdminPJService;
 import gg.jominsubyungsin.domain.entity.ProjectEntity;
@@ -52,6 +53,21 @@ public class AdminPJController {
         return result;
     }
 
+    @GetMapping("/detail/{id}")
+    public Response detailProject(@PathVariable Long id) {
+        Response result;
+
+        ProjectEntity thereProject = adminPJService.isThereProject(id);
+
+        try {
+            result =  adminPJService.getProjectDetail(thereProject);
+        } catch (Exception e) {
+            throw new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR, "서버 에러");
+        }
+
+        return result;
+    }
+
     /**
      * 프로젝트 받아오기
      */
@@ -66,4 +82,6 @@ public class AdminPJController {
 
         return result;
     }
+
+
 }

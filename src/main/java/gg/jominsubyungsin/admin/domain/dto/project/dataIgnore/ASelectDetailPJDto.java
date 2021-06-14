@@ -1,5 +1,6 @@
 package gg.jominsubyungsin.admin.domain.dto.project.dataIgnore;
 
+import gg.jominsubyungsin.admin.domain.dto.comment.dataIgnore.ASelectCommentDto;
 import gg.jominsubyungsin.admin.domain.dto.user.dataIgnore.ASelectUserDto;
 import gg.jominsubyungsin.domain.entity.FileEntity;
 import gg.jominsubyungsin.domain.entity.ProjectEntity;
@@ -11,24 +12,31 @@ import java.util.List;
 
 @Getter
 @Setter
-public class ASelectPJDto {
+public class ASelectDetailPJDto {
     private Long id;
     private String title;
-    private FileEntity mainPhoto;
+    private String content;
     private Date createAt;
-    private boolean onDelete;
+    private Boolean onDelete;
     private List<ASelectUserDto> users;
     private List<String> tags;
+    private List<FileEntity> files;
     private Long likeNum;
+    private List<ASelectCommentDto> comments;
 
-    public ASelectPJDto(ProjectEntity projectEntity, List<ASelectUserDto> selectUserDto, List<String> tags, Long likeNum) {
+    public ASelectDetailPJDto(ProjectEntity projectEntity, List<ASelectUserDto> users,
+                              List<String> tags, List<FileEntity> files,
+                              Long likeNum, List<ASelectCommentDto> comments) {
         this.id = projectEntity.getId();
         this.title = projectEntity.getTitle();
+        this.content = projectEntity.getContent();
         this.createAt = projectEntity.getCreateAt();
         this.onDelete = projectEntity.getOnDelete();
-        this.mainPhoto = projectEntity.getFiles().get(0);
+        this.users = users;
         this.tags = tags;
-        this.users = selectUserDto;
+        this.files = files;
         this.likeNum = likeNum;
+        this.comments = comments;
     }
+
 }
