@@ -35,11 +35,11 @@ public class AdminBannerController {
     }
 
     @GetMapping("")
-    public Response getBanners(Pageable pageable) {
+    public Response getBanners() {
         Response result;
 
         try {
-            result = bannerService.showBannerList(pageable);
+            result = bannerService.showBannerList();
         } catch (Exception e) {
             throw new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR, "서버 에러");
         }
