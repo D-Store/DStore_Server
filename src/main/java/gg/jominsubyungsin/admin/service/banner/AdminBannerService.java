@@ -8,7 +8,7 @@ import org.springframework.web.multipart.MultipartFile;
 public interface AdminBannerService {
     boolean bannerUpload(MultipartFile file);
 
-    Response showBannerList(Pageable pageable);
+    Response showBannerList();
 
     boolean dropBanner(BannerEntity targetBanner);
 

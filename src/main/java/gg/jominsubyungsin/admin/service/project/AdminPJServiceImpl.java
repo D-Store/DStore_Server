@@ -59,6 +59,7 @@ public class AdminPJServiceImpl implements AdminPJService {
             for (ProjectEntity projectEntity : projectEntities) {
                 List<ASelectUserDto> userDtos = new ArrayList<>();
 
+
                 for (ProjectUserConnectEntity connectEntity : projectEntity.getUsers()) {
                     ASelectUserDto userDto = new ASelectUserDto(connectEntity.getUser());
                     userDtos.add(userDto);

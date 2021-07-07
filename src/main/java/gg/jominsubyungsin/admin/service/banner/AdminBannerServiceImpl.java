@@ -3,6 +3,7 @@ package gg.jominsubyungsin.admin.service.banner;
 import gg.jominsubyungsin.admin.domain.dto.banner.datalgnore.ASelectBanner;
 import gg.jominsubyungsin.admin.domain.dto.banner.response.BannerListResponse;
 import gg.jominsubyungsin.admin.domain.repository.BannerListRepo;
+import gg.jominsubyungsin.admin.domain.repository.BannerRepo;
 import gg.jominsubyungsin.admin.service.multipart.AdminMultipartService;
 import gg.jominsubyungsin.domain.entity.BannerEntity;
 import gg.jominsubyungsin.domain.response.Response;
@@ -24,9 +25,13 @@ public class AdminBannerServiceImpl implements AdminBannerService {
     private final AdminMultipartService multipartService;
 
     private final BannerListRepo bannerListRepository;
+    private final BannerRepo bannerRepo;
 
     @Override
     public boolean bannerUpload(MultipartFile file) {
+        if(file.isEmpty()) {
+            throw new HttpClientErrorException(HttpStatus.OK, "파일이 비었음");
+        }
         String url = multipartService.uploadFile(file);
         try {
             BannerEntity bannerEntity = new BannerEntity();
@@ -39,13 +44,13 @@ public class AdminBannerServiceImpl implements AdminBannerService {
     }
 
     @Override
-    public Response showBannerList(Pageable pageable) {
+    public Response showBannerList() {
         BannerListResponse response = new BannerListResponse();
         List<ASelectBanner> bannerList = new ArrayList<>();
-        Page<BannerEntity> bannerEntityPage;
+        List<BannerEntity> bannerEntityPage;
 
         try {
-            bannerEntityPage = bannerListRepository.findAll(pageable);
+            bannerEntityPage = bannerRepo.findAll();
 
             for (BannerEntity entity : bannerEntityPage) {
                 ASelectBanner banner = new ASelectBanner(entity);
@@ -56,7 +61,6 @@ public class AdminBannerServiceImpl implements AdminBannerService {
             response.setHttpStatus(HttpStatus.OK);
             response.setMessage("배너 보기 성공");
             response.setBannerList(bannerList);
-            response.setTotalPages(bannerEntityPage.getTotalPages());
 
             return response;
         } catch (Exception e) {

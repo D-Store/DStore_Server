@@ -11,5 +11,4 @@ import java.util.List;
 @Setter
 public class BannerListResponse extends Response {
     private List<ASelectBanner> bannerList;
-    private int totalPages;
 }
