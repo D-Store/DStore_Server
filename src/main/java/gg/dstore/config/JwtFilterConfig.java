@@ -26,6 +26,7 @@ public class JwtFilterConfig {
 			registrationBean.addUrlPatterns("/like/*");
 			registrationBean.addUrlPatterns("/follow/*");
 			registrationBean.addUrlPatterns("/tag/find/projects");
+			registrationBean.addUrlPatterns("/admin/*");
 			registrationBean.setOrder(2);
 
 			return registrationBean;
