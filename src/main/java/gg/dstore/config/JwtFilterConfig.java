@@ -30,7 +30,7 @@ public class JwtFilterConfig {
 
 			return registrationBean;
 		} catch (Exception e) {
-			throw new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR, "fuck cors");
+			throw new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR, "cors error");
 		}
 	}
 
